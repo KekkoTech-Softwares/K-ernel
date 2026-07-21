@@ -1,1 +1,33 @@
 guide.md
+
+# --- Build ---
+build/
+isodir/
+*.o
+*.d
+*.a
+*.bin
+*.elf
+*.iso
+
+# Output linker Github
+*.map
+*.sym
+
+# --- Debug / exec ---
+*.log
+.gdb_history
+
+# --- macOS ---
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+
+# --- Editor / IDE ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+compile_commands.json
