@@ -10,13 +10,13 @@
 #define VERSION_H
 
 #define KERNEL_NAME "K-ernel"
-#define KERNEL_DESCRIPTION "Created and maintained by KekkoTech Softwares Open Source"
+#define KERNEL_DESCRIPTION "Copyright (C) 2026 KekkoTech Softwares Open Source. All rights reserved."
 
 /* Semantic versioning. */
 #define KERNEL_VERSION_MAJOR 0
 #define KERNEL_VERSION_MINOR 1
-#define KERNEL_VERSION_PATCH 0
-#define KERNEL_VERSION_NAME "Piola - Pre Alpha"
+#define KERNEL_VERSION_PATCH 1
+#define KERNEL_VERSION_NAME "Piola | pre alpha"
 
 #define KERNEL_STRINGIFY_(x) #x
 #define KERNEL_STRINGIFY(x) KERNEL_STRINGIFY_(x)

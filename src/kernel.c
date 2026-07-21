@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 #include "kprintf.h"
+#include "string.h"
 #include "serial.h"
 #include "version.h"
 #include "vga.h"
@@ -43,15 +44,29 @@ void kernel_main(uint32_t magic, uint32_t *mb_info)
 
     serial_init();
     vga_init();
-    kputs("kputchar working pretty well\n");
+
+    //---- KERNEL TEST SECTION ----
+    kputs("\n\n\n\n");
+    kputs("----- K-ERNEL AUTOTEST -----");
+    kputs("\n");
+    kputs("KPUTCHAR TEST: working pretty well.\n");
+    char buf[16];
+    memset(buf, 'x', 5);
+    buf[5] = '\0';
+    kputs("[");
+    kputs(buf);
+    kputs("]");
+    kputs("\n");
+    kputs("MEMORY&STRINGS TEST: if you saw 5 x it is working.");
 
     /* Every piece here is a string literal, so the compiler concatenates
      * them into a single constant: no formatting needed at runtime. */
+    kputs("\n\n\n\n");
     vga_set_color(VGA_LIGHT_CYAN, VGA_BLACK);
     kputs(KERNEL_NAME " v" KERNEL_VERSION_STRING "\n");
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
     kputs(KERNEL_DESCRIPTION "\n");
-    kputs("Phase 1: booted through GRUB/Multiboot.\n\n");
+    kputs("Booted through GRUB/Multiboot.\n\n");
 
     kputs("Multiboot magic: ");
     kput_hex(magic);
