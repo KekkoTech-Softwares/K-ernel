@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT
  * Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
  *
- * vga.h — terminale testuale sul VGA text buffer (0xB8000, 80x25).
+ * vga.h — text terminal on the VGA text buffer (0xB8000, 80x25).
  */
 
 #ifndef VGA_H

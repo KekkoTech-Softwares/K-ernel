@@ -1,12 +1,13 @@
 /* SPDX-License-Identifier: MIT
  * Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
  *
- * io.h — accesso alle porte I/O x86.
+ * io.h — x86 port I/O access.
  *
- * Su x86 le periferiche legacy non sono mappate in memoria ma in uno spazio
- * di indirizzamento separato, raggiungibile solo con le istruzioni `in`/`out`.
- * Da C serve inline assembly: static inline cosi' il compilatore le espande
- * senza chiamata di funzione.
+ * On x86 the legacy peripherals are not memory mapped: they live in a
+ * separate address space reachable only through the `in` and `out`
+ * instructions. Getting at them from C takes inline assembly, declared
+ * static inline so the compiler expands it in place instead of emitting a
+ * function call.
  */
 
 #ifndef IO_H
@@ -16,7 +17,8 @@
 
 static inline void outb(uint16_t port, uint8_t value)
 {
-    /* "a" = valore in al, "Nd" = porta in dx (o immediato se costante < 256) */
+    /* "a" puts the value in al, "Nd" the port in dx (or encodes it as an
+     * immediate when it is a constant below 256). */
     __asm__ volatile("outb %0, %1" : : "a"(value), "Nd"(port));
 }
 

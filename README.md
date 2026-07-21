@@ -72,7 +72,13 @@ subito nel container: non serve ricostruire l'immagine né riaprire la shell.
 | `make check`   | Verifica che il binario contenga un header Multiboot valido.     |
 | `make clean`   | Rimuove tutti gli artefatti di build.                            |
 
-Per uscire da QEMU: `Ctrl-A` seguito da `X`.
+Per uscire da QEMU: `Ctrl-C`.
+
+La sequenza `Ctrl-A` `X` documentata in molte guide qui **non** funziona: è
+l'escape del multiplexer di QEMU, attivo solo quando il monitor e la porta
+seriale condividono lo stesso canale (come con `-nographic`). Con
+`-serial stdio` la seriale ha il terminale per sé e `Ctrl-C` arriva a QEMU
+come un normale SIGINT.
 
 ### Debug con GDB
 

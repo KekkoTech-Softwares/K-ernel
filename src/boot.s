@@ -1,18 +1,18 @@
 ; SPDX-License-Identifier: MIT
 ; Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
 ;
-; boot.s — header Multiboot ed entry point del kernel.
+; boot.s — Multiboot header and kernel entry point.
 ;
-; GRUB cerca l'header Multiboot nei primi 8 KiB del binario: il linker script
-; mette la sezione .multiboot in testa a .text proprio per garantirlo.
-; Quando GRUB ci passa il controllo siamo gia' in protected mode a 32 bit,
-; con interrupt disabilitati e paging spento.
+; GRUB looks for the Multiboot header within the first 8 KiB of the binary;
+; the linker script places the .multiboot section at the very start of .text
+; to guarantee that. By the time GRUB hands over control the CPU is already
+; in 32-bit protected mode, with interrupts disabled and paging off.
 
-MBALIGN  equ 1 << 0                 ; allinea i moduli caricati a 4 KiB
-MEMINFO  equ 1 << 1                 ; chiedi a GRUB la memory map
+MBALIGN  equ 1 << 0                 ; align loaded modules on 4 KiB boundaries
+MEMINFO  equ 1 << 1                 ; ask GRUB for the memory map
 FLAGS    equ MBALIGN | MEMINFO
-MAGIC    equ 0x1BADB002             ; numero magico Multiboot 1
-CHECKSUM equ -(MAGIC + FLAGS)       ; MAGIC + FLAGS + CHECKSUM deve fare 0
+MAGIC    equ 0x1BADB002             ; Multiboot 1 magic number
+CHECKSUM equ -(MAGIC + FLAGS)       ; MAGIC + FLAGS + CHECKSUM must total 0
 
 section .multiboot
 align 4
@@ -20,9 +20,9 @@ align 4
     dd FLAGS
     dd CHECKSUM
 
-; Lo stack non esiste finche' non ce lo creiamo noi: GRUB non ne garantisce
-; uno utilizzabile. Lo mettiamo in .bss (non occupa spazio nel binario) e
-; cresce verso il basso, da stack_top a stack_bottom.
+; GRUB does not guarantee a usable stack, so the kernel provides its own.
+; It lives in .bss, which takes up no space in the binary, and grows
+; downwards from stack_top to stack_bottom.
 section .bss
 align 16
 stack_bottom:
@@ -34,20 +34,20 @@ global _start
 extern kernel_main
 
 _start:
-    mov esp, stack_top              ; il C ha bisogno di uno stack
+    mov esp, stack_top              ; C code cannot run without a stack
 
-    ; ABI System V i386: esp deve essere allineato a 16 byte al momento della
-    ; `call`. stack_top e' allineato a 16; i due push sottraggono 8, quindi
-    ; ne togliamo altri 8 per tornare in bolla.
+    ; System V i386 ABI: esp must be 16-byte aligned at the point of the
+    ; `call`. stack_top is 16-byte aligned and the two pushes below subtract
+    ; 8, so another 8 bytes restore the alignment.
     sub esp, 8
-    push ebx                        ; secondo argomento: puntatore info Multiboot
-    push eax                        ; primo argomento: magic number (0x2BADB002)
+    push ebx                        ; second argument: Multiboot info pointer
+    push eax                        ; first argument: magic number (0x2BADB002)
 
     call kernel_main
 
-    ; kernel_main non dovrebbe mai tornare. Se succede, blocchiamo la CPU:
-    ; cli spegne gli interrupt, hlt la ferma finche' non ne arriva uno (e non
-    ; ne arrivano piu'), il jmp copre il caso di un NMI che risveglia la CPU.
+    ; kernel_main is not expected to return. Should it ever do so, halt the
+    ; CPU: cli disables interrupts, hlt parks the CPU until one arrives (and
+    ; none will), and the jmp covers an NMI waking the CPU back up.
     cli
 .hang:
     hlt

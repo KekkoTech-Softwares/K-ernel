@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: MIT
  * Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
  *
- * serial.h — output su porta seriale COM1, il canale di logging del kernel.
+ * serial.h — COM1 serial port output, the kernel logging channel.
  */
 
 #ifndef SERIAL_H

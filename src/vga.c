@@ -1,12 +1,12 @@
 /* SPDX-License-Identifier: MIT
  * Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
  *
- * vga.c — terminale testuale sul VGA text buffer.
+ * vga.c — text terminal on the VGA text buffer.
  *
- * A 0xB8000 c'e' una matrice 80x25 di celle da 2 byte: il byte basso e' il
- * codice ASCII, quello alto il colore (4 bit foreground + 4 bit background).
- * Scrivere in quella memoria significa scrivere sullo schermo, senza
- * bisogno di driver: e' il modo piu' diretto per avere output da un kernel.
+ * At 0xB8000 sits an 80x25 grid of 2-byte cells: the low byte holds the
+ * ASCII code, the high byte the color (4 bits foreground, 4 bits
+ * background). Writing to that memory writes to the screen, with no driver
+ * involved — the most direct way to get output out of a kernel.
  */
 
 #include "vga.h"
@@ -15,8 +15,8 @@
 #define VGA_WIDTH  80
 #define VGA_HEIGHT 25
 
-/* volatile: il compilatore non deve ottimizzare via scritture che "sembrano"
- * inutili, perche' hanno un effetto collaterale visibile (lo schermo). */
+/* volatile keeps the compiler from optimising away stores that look useless
+ * to it: their side effect is visible on screen, not in the program state. */
 static volatile uint16_t *const vga_buffer = (volatile uint16_t *)0xB8000;
 
 static size_t vga_row;
@@ -28,9 +28,9 @@ static inline uint16_t vga_entry(char c, uint8_t attr)
     return (uint16_t)(uint8_t)c | ((uint16_t)attr << 8);
 }
 
-/* Il cursore hardware si pilota tramite due porte: 0x3D4 seleziona il
- * registro interno del controller VGA, 0x3D5 ne legge/scrive il valore.
- * I registri 14 e 15 contengono la posizione del cursore su 16 bit. */
+/* The hardware cursor is driven through two ports: 0x3D4 selects an internal
+ * register of the VGA controller and 0x3D5 reads or writes its value.
+ * Registers 14 and 15 hold the 16-bit cursor position. */
 static void vga_update_cursor(void)
 {
     uint16_t pos = (uint16_t)(vga_row * VGA_WIDTH + vga_column);
@@ -48,7 +48,8 @@ static void vga_clear(void)
             vga_buffer[y * VGA_WIDTH + x] = vga_entry(' ', vga_attr);
 }
 
-/* Scorre lo schermo di una riga: copia tutto in su e svuota l'ultima riga. */
+/* Scrolls the screen by one line: everything moves up and the last line is
+ * cleared. */
 static void vga_scroll(void)
 {
     for (size_t y = 1; y < VGA_HEIGHT; y++)

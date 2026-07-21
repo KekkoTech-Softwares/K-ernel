@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
 #
-# Builda (se serve) e apre una shell nel container con la toolchain di K-ernel.
-# Il progetto viene montato in /kernel dentro il container, quindi le modifiche
-# ai file fatte da fuori (es. col tuo editor) sono visibili subito dentro.
+# Builds the image if needed and opens a shell in the K-ernel toolchain
+# container. The project is mounted at /kernel inside the container, so edits
+# made from the host show up immediately in the build.
 set -euo pipefail
 
 IMAGE_NAME="k-ernel-toolchain"

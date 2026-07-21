@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
 #
-# Toolchain per K-ernel: cross-compiler i686-elf + NASM + QEMU + GRUB + xorriso + GDB.
-# Vedi guide.md, Fase 0.
+# K-ernel toolchain: i686-elf cross-compiler + NASM + QEMU + GRUB + xorriso + GDB.
+# See guide.md, phase 0.
 
-# Forziamo amd64: grub-pc-bin (boot image BIOS x86) non esiste per arm64.
-# Docker Desktop su Apple Silicon emula amd64 via Rosetta/QEMU in modo trasparente.
+# amd64 is forced because grub-pc-bin (the x86 BIOS boot images) has no arm64
+# build. On Apple Silicon, Docker Desktop emulates amd64 transparently.
 FROM --platform=linux/amd64 debian:bookworm-slim
 
 ARG BINUTILS_VERSION=2.42
@@ -48,7 +48,7 @@ RUN mkdir -p /usr/src/cross && cd /usr/src/cross \
     && make install \
     && cd / && rm -rf /usr/src/cross/binutils-${BINUTILS_VERSION} /usr/src/cross/build-binutils /usr/src/cross/binutils-${BINUTILS_VERSION}.tar.gz
 
-# --- Cross-compiler: gcc (solo C, senza headers/libc: è un compilatore "freestanding") ---
+# --- Cross-compiler: gcc (no headers, no libc: a "freestanding" compiler) ---
 RUN cd /usr/src/cross \
     && wget -q https://ftp.gnu.org/gnu/gcc/gcc-${GCC_VERSION}/gcc-${GCC_VERSION}.tar.gz \
     && tar xf gcc-${GCC_VERSION}.tar.gz \
