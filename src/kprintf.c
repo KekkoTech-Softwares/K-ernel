@@ -7,6 +7,7 @@
  */
 
 #include <stddef.h>
+#include <stdarg.h>
 
 #include "kprintf.h"
 #include "serial.h"
@@ -16,7 +17,6 @@
 width is the minimum lenght. If the number is shorter it is filled on the left with the pad character. 
 width = 0 means "no filling"*/
 static void print_uint(unsigned int value, unsigned int base, int width, char pad) {
-    
     static const char digits[] = "0123456789ABCDEF";
     char buf[33]; //this is the worst case->32 digits base 2 plus padding.
     int len = 0;
@@ -61,4 +61,70 @@ void kputchar(char c) {
 void kputs(const char *str) {
     for(size_t i = 0; str[i]; i++)
         kputchar(str[i]);
+}
+
+void kprintf(const char *fmt, ...) {
+    
+    va_list args;
+
+    va_start(args, fmt);
+
+    for(size_t i = 0; fmt[i]; i++) {
+        //norma text print
+        if(fmt[i] != '%') {
+            kputchar(fmt[i]);
+            continue;
+        }
+
+        i++; //reading of the char after '%'
+
+        //if the string ends with '%' i dunnow
+        if(fmt[i] == '\0')
+            break;
+        
+        //padding with '0' f.ex.: %08x
+        char pad = ' ';
+        int width = 0;
+
+        if (fmt[i] == '0') {
+            pad = '0';
+            i++;
+        }
+        while(fmt[i] >= '0' && fmt[i] <= '9') {
+            width = width * 10 + fmt[i] - '0';
+            i++;
+        }
+
+        switch(fmt[i]) {
+            case 'd':
+            case 'i':
+                print_int(va_arg(args, int));
+                break;
+            case 'u':
+                print_uint(va_arg(args, unsigned int), 10, width, pad);
+                break;
+            case 'x':
+                print_uint(va_arg(args, unsigned int), 16, width, pad);
+                break;
+            case 'p':
+                kputs("0x");
+                print_uint((unsigned int)va_arg(args, void *), 16, 8, '0');
+                break;
+            case 'c':
+                kputchar((char)va_arg(args, int));
+                break;
+            case 's':
+                kputs(va_arg(args, const char *));
+                break;
+            case '%':
+                kputchar('%');
+                break;
+            default: //unkown idetificator. show it as it is.
+                kputchar('%');
+                kputchar(fmt[i]);
+                break;
+        }
+    }
+
+    va_end(args);
 }

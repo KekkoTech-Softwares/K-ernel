@@ -10,5 +10,6 @@
 
  void kputchar(char c);
  void kputs(const char *str);
+ void kprintf(const char *fmt, ...);
 
  #endif //KPRINTF_H
