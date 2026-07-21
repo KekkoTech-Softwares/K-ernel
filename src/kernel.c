@@ -1,33 +1,28 @@
 /* SPDX-License-Identifier: MIT
  * Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
  *
- * kernel.c — punto di ingresso in C del kernel.
+ * kernel.c — the kernel's C entry point.
  *
- * Ci arriva `_start` (boot.s) dopo che GRUB ci ha caricati a 1 MiB e messi in
- * protected mode. Qui il C e' "freestanding": niente libc, niente printf,
- * niente malloc, nessun sistema operativo sotto di noi. Tutto quello che
- * usiamo, prima ce lo scriviamo.
+ * Reached from `_start` (boot.s) once GRUB has loaded the kernel at 1 MiB and
+ * switched the CPU to protected mode. C here is "freestanding": no libc, no
+ * printf, no malloc, no operating system underneath. Anything used has to be
+ * written first.
  */
 
 #include <stdint.h>
 
+#include "kprintf.h"
 #include "serial.h"
+#include "version.h"
 #include "vga.h"
 
-/* Valore che GRUB lascia in eax per dire "ti ho caricato io, via Multiboot".
- * Nota: e' diverso dal magic dell'header (0x1BADB002) che GRUB cerca in noi. */
+/* The value GRUB leaves in eax to signal "I loaded you, through Multiboot".
+ * Note this differs from the header magic (0x1BADB002) that GRUB looks for
+ * inside the kernel binary. */
 #define MULTIBOOT_BOOTLOADER_MAGIC 0x2BADB002
 
-/* Scrive sia sullo schermo sia sulla seriale: lo schermo per il colpo d'occhio,
- * la seriale perche' e' scrollabile e resta nel terminale dell'host. */
-static void kputs(const char *str)
-{
-    vga_puts(str);
-    serial_puts(str);
-}
-
-/* Primo pezzo della futura mini-libreria: stampa un uint32 in esadecimale.
- * Serve gia' adesso per far vedere il magic number che GRUB ci ha passato. */
+/* First piece of the future mini-library: prints a uint32 in hexadecimal.
+ * Needed already to show the magic number handed over by GRUB. */
 static void kput_hex(uint32_t value)
 {
     static const char digits[] = "0123456789ABCDEF";
@@ -44,15 +39,19 @@ static void kput_hex(uint32_t value)
 
 void kernel_main(uint32_t magic, uint32_t *mb_info)
 {
-    (void)mb_info; /* la memory map ci servira' in Fase 4 (PMM) */
+    (void)mb_info; /* I'll need this memory map during phase 4 (PMM) */
 
     serial_init();
     vga_init();
+    kputs("kputchar working pretty well\n");
 
+    /* Every piece here is a string literal, so the compiler concatenates
+     * them into a single constant: no formatting needed at runtime. */
     vga_set_color(VGA_LIGHT_CYAN, VGA_BLACK);
-    kputs("K-ernel\n");
+    kputs(KERNEL_NAME " v" KERNEL_VERSION_STRING "\n");
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
-    kputs("Fase 1: boot via GRUB/Multiboot completato.\n\n");
+    kputs(KERNEL_DESCRIPTION "\n");
+    kputs("Phase 1: booted through GRUB/Multiboot.\n\n");
 
     kputs("Multiboot magic: ");
     kput_hex(magic);
@@ -61,17 +60,17 @@ void kernel_main(uint32_t magic, uint32_t *mb_info)
         vga_set_color(VGA_LIGHT_GREEN, VGA_BLACK);
         kputs("  [OK]\n");
     } else {
-        /* Se il magic non torna, non siamo stati caricati da un bootloader
-         * Multiboot: mb_info non e' affidabile e non va usato. */
+        /* A mismatching magic means the kernel was not loaded by a Multiboot
+         * bootloader, so mb_info is not trustworthy and must not be used. */
         vga_set_color(VGA_LIGHT_RED, VGA_BLACK);
-        kputs("  [ATTESO 0x2BADB002]\n");
+        kputs("  [EXPECTED 0x2BADB002]\n");
     }
 
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
-    kputs("\nProssimo passo: GDT (Fase 2).\n");
+    kputs("\nNext step: GDT (phase 2).\n");
 
-    /* Non abbiamo nulla da schedulare: fermiamo la CPU. `hlt` la mette in
-     * pausa fino al prossimo interrupt, cosi' non brucia un core a vuoto. */
+    /* Nothing left to schedule, so halt the CPU. `hlt` parks it until the
+     * next interrupt instead of burning a core on an empty loop. */
     for (;;)
         __asm__ volatile("hlt");
 }
