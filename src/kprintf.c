@@ -65,6 +65,15 @@ void kputs(const char *str) {
         kputchar(str[i]);
 }
 
+//prints the low bits of value, most significant first, inserting "_" every group bits. group = 0 disables the separator
+static void print_bits(unsigned int value, int bits, int group) {
+    for(int i = bits - 1; i >= 0; i--) {
+        kputchar((value >> i) & 1u ? '1' : '0');
+        if(group > 0 && i > 0 && i % group == 0)
+            kputchar('_');
+    }
+}
+
 void kvprintf(const char *fmt, va_list args) {
 
     for(size_t i = 0; fmt[i]; i++) {
@@ -106,6 +115,12 @@ void kvprintf(const char *fmt, va_list args) {
                 break;
             case 'X':
                 print_uint(va_arg(args, unsigned int), 16, width, pad, 1);
+                break;
+            case 'b':
+                print_uint(va_arg(args, unsigned int), 2, width, pad, 0);
+                break;
+            case 'B':
+                print_bits(va_arg(args, unsigned int), width > 0 ? width : 32, 8);
                 break;
             case 'p':
                 kputs("0x");
