@@ -15,8 +15,8 @@
 /* Semantic versioning. */
 #define KERNEL_VERSION_MAJOR 0
 #define KERNEL_VERSION_MINOR 1
-#define KERNEL_VERSION_PATCH 1
-#define KERNEL_VERSION_NAME "Piola | pre alpha"
+#define KERNEL_VERSION_PATCH 2
+#define KERNEL_VERSION_NAME "Piola | Milestone 1 | pre-alpha"
 
 #define KERNEL_STRINGIFY_(x) #x
 #define KERNEL_STRINGIFY(x) KERNEL_STRINGIFY_(x)
