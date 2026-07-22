@@ -16,8 +16,10 @@
 /*PRINT-UINT: print an integer whithout sign in the indicated base (f.ex.: 10, 2, 16 ecc..)
 width is the minimum lenght. If the number is shorter it is filled on the left with the pad character. 
 width = 0 means "no filling"*/
-static void print_uint(unsigned int value, unsigned int base, int width, char pad) {
-    static const char digits[] = "0123456789ABCDEF";
+static void print_uint(unsigned int value, unsigned int base, int width, char pad, int upper) {
+    static const char digits_upper[] = "0123456789ABCDEF";
+    static const char digits_lower[] = "0123456789abcdef";
+    const char * digits = upper ? digits_upper : digits_lower;
     char buf[33]; //this is the worst case->32 digits base 2 plus padding.
     int len = 0;
 
@@ -49,7 +51,7 @@ static void print_int(int value) {
         u = -u;
     }
 
-    print_uint(u, 10, 0, ' ');
+    print_uint(u, 10, 0, ' ', 0);
 }
 
 
@@ -63,11 +65,7 @@ void kputs(const char *str) {
         kputchar(str[i]);
 }
 
-void kprintf(const char *fmt, ...) {
-    
-    va_list args;
-
-    va_start(args, fmt);
+void kvprintf(const char *fmt, va_list args) {
 
     for(size_t i = 0; fmt[i]; i++) {
         //norma text print
@@ -101,14 +99,17 @@ void kprintf(const char *fmt, ...) {
                 print_int(va_arg(args, int));
                 break;
             case 'u':
-                print_uint(va_arg(args, unsigned int), 10, width, pad);
+                print_uint(va_arg(args, unsigned int), 10, width, pad, 0);
                 break;
             case 'x':
-                print_uint(va_arg(args, unsigned int), 16, width, pad);
+                print_uint(va_arg(args, unsigned int), 16, width, pad, 0);
+                break;
+            case 'X':
+                print_uint(va_arg(args, unsigned int), 16, width, pad, 1);
                 break;
             case 'p':
                 kputs("0x");
-                print_uint((unsigned int)va_arg(args, void *), 16, 8, '0');
+                print_uint((unsigned int)va_arg(args, void *), 16, 8, '0', 1);
                 break;
             case 'c':
                 kputchar((char)va_arg(args, int));
@@ -125,6 +126,12 @@ void kprintf(const char *fmt, ...) {
                 break;
         }
     }
+}
 
+void kprintf(const char * fmt, ...) {
+    va_list args;
+
+    va_start(args, fmt);
+    kvprintf(fmt, args);
     va_end(args);
 }

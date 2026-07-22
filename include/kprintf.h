@@ -5,11 +5,14 @@
  */
 
  //Include guard. 
- #ifndef KPRINTF_H
- #define KPRINTF_H
+#ifndef KPRINTF_H
+#define KPRINTF_H
 
- void kputchar(char c);
- void kputs(const char *str);
- void kprintf(const char *fmt, ...);
+#include <stdarg.h>
 
- #endif //KPRINTF_H
+void kputchar(char c);
+void kputs(const char *str);
+void kvprintf(const char *fmt, va_list args);
+void kprintf(const char *fmt, ...);
+
+#endif //KPRINTF_H
