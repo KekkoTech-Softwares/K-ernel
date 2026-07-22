@@ -13,6 +13,8 @@
 #include "serial.h"
 #include "vga.h"
 
+static unsigned int kout_channels = KOUT_ALL;
+
 /*PRINT-UINT: print an integer whithout sign in the indicated base (f.ex.: 10, 2, 16 ecc..)
 width is the minimum lenght. If the number is shorter it is filled on the left with the pad character. 
 width = 0 means "no filling"*/
@@ -149,4 +151,19 @@ void kprintf(const char * fmt, ...) {
     va_start(args, fmt);
     kvprintf(fmt, args);
     va_end(args);
+}
+
+unsigned int kout_get(void) {
+    return kout_channels;
+}
+
+void kout_set(unsigned int channels) {
+    kout_channels = channels;
+}
+
+void kputchar(char c) {
+    if(kout_channels & KOUT_VGA)
+        vga_putchar(c);
+    if(kout_channels & KOUT_SERIAL)
+        serial_putchar(c);
 }
