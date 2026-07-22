@@ -35,9 +35,14 @@ void kernel_main(uint32_t magic, uint32_t *mb_info)
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
     kprintf(KERNEL_DESCRIPTION "\n");
     kprintf("\n\n");
+
+    // --- Ker Test ---
     kprintf("I'm starting...\n");
     kprintf("now i'll do some tests for verifiyng that everything is ok.\n");
+    unsigned int saved = kout_get(); //save status
+    kout_set(KOUT_SERIAL); //switch to serial
     ktest_run();
+    kout_set(saved); //back as it was (saved status)
 
 
     kprintf("\n\n");

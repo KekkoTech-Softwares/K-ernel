@@ -10,7 +10,7 @@
 #define VERSION_H
 
 #define KERNEL_NAME "K-ernel"
-#define KERNEL_DESCRIPTION "Copyright (C) 2026 KekkoTech Softwares Open Source. All rights reserved."
+#define KERNEL_DESCRIPTION "Copyright (C) 2026 KekkoTech Softwares Open Source Project. All rights reserved."
 
 /* Semantic versioning. */
 #define KERNEL_VERSION_MAJOR 0
