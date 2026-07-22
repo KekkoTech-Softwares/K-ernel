@@ -12,6 +12,7 @@
 #include <stdint.h>
 
 #include "kprintf.h"
+#include "ktest.h"
 #include "string.h"
 #include "serial.h"
 #include "version.h"
@@ -22,67 +23,35 @@
  * inside the kernel binary. */
 #define MULTIBOOT_BOOTLOADER_MAGIC 0x2BADB002
 
-/* First piece of the future mini-library: prints a uint32 in hexadecimal.
- * Needed already to show the magic number handed over by GRUB. */
-static void kput_hex(uint32_t value)
-{
-    static const char digits[] = "0123456789ABCDEF";
-    char buf[11];
-
-    buf[0] = '0';
-    buf[1] = 'x';
-    for (int i = 0; i < 8; i++)
-        buf[2 + i] = digits[(value >> ((7 - i) * 4)) & 0xF];
-    buf[10] = '\0';
-
-    kputs(buf);
-}
-
 void kernel_main(uint32_t magic, uint32_t *mb_info)
 {
     (void)mb_info; /* I'll need this memory map during phase 4 (PMM) */
 
     serial_init();
     vga_init();
+    ktest_run();
 
-    //---- KERNEL TEST SECTION ----
-    kputs("\n\n\n\n");
-    kputs("----- K-ERNEL AUTOTEST -----");
-    kputs("\n");
-    kputs("KPUTCHAR TEST: working pretty well.\n");
-    char buf[16];
-    memset(buf, 'x', 5);
-    buf[5] = '\0';
-    kputs("[");
-    kputs(buf);
-    kputs("]");
-    kputs("\n");
-    kputs("MEMORY&STRINGS TEST: if you saw 5 x it is working.");
 
-    /* Every piece here is a string literal, so the compiler concatenates
-     * them into a single constant: no formatting needed at runtime. */
-    kputs("\n\n\n\n");
+    kprintf("\n\n\n\n");
     vga_set_color(VGA_LIGHT_CYAN, VGA_BLACK);
-    kputs(KERNEL_NAME " v" KERNEL_VERSION_STRING "\n");
+    kprintf(KERNEL_NAME " v" KERNEL_VERSION_STRING "\n");
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
-    kputs(KERNEL_DESCRIPTION "\n");
-    kputs("Booted through GRUB/Multiboot.\n\n");
+    kprintf(KERNEL_DESCRIPTION "\n");
+    kprintf("Booted through GRUB/Multiboot.\n\n");
 
-    kputs("Multiboot magic: ");
-    kput_hex(magic);
+    kprintf("Multiboot magic: 0x%08x", magic);
 
     if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
         vga_set_color(VGA_LIGHT_GREEN, VGA_BLACK);
-        kputs("  [OK]\n");
+        kprintf("  [OK]\n");
     } else {
         /* A mismatching magic means the kernel was not loaded by a Multiboot
          * bootloader, so mb_info is not trustworthy and must not be used. */
         vga_set_color(VGA_LIGHT_RED, VGA_BLACK);
-        kputs("  [EXPECTED 0x2BADB002]\n");
+        kprintf("  [EXPECTED 0x2BADB002]\n");
     }
 
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
-    kputs("\nNext step: GDT (phase 2).\n");
 
     /* Nothing left to schedule, so halt the CPU. `hlt` parks it until the
      * next interrupt instead of burning a core on an empty loop. */
