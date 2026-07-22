@@ -66,7 +66,7 @@ void ktest_run(void) {
     checks = 0;
     failed = 0;
 
-    kprintf("---- K-ERNEL SELF TESTS ----");
+    kprintf("---- K-ERNEL SELF TESTS ----\n");
     test_string();
     test_memmove();
     kprintf("\nself tests: %d/%d passed\n\n", checks - failed, checks);

@@ -26,17 +26,22 @@
 void kernel_main(uint32_t magic, uint32_t *mb_info)
 {
     (void)mb_info; /* I'll need this memory map during phase 4 (PMM) */
-
     serial_init();
     vga_init();
-    ktest_run();
 
-
-    kprintf("\n\n\n\n");
+    kprintf("\n\n")
     vga_set_color(VGA_LIGHT_CYAN, VGA_BLACK);
     kprintf(KERNEL_NAME " v" KERNEL_VERSION_STRING "\n");
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
     kprintf(KERNEL_DESCRIPTION "\n");
+    kprintf("\n\n");
+    kprintf("I'm starting...\n");
+    kprintf("now i'll do some tests for verifiyng that everything is ok.\n");
+    ktest_run();
+
+
+    kprintf("\n\n");
+   
     kprintf("Booted through GRUB/Multiboot.\n\n");
 
     kprintf("Multiboot magic: 0x%08x", magic);
