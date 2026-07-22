@@ -41,10 +41,10 @@ void kernel_main(uint32_t magic, uint32_t *mb_info)
 
 
     kprintf("\n\n");
-   
+
     kprintf("Booted through GRUB/Multiboot.\n\n");
 
-    kprintf("Multiboot magic: 0x%08x", magic);
+    kprintf("Multiboot magic: 0x%08X", magic);
 
     if (magic == MULTIBOOT_BOOTLOADER_MAGIC) {
         vga_set_color(VGA_LIGHT_GREEN, VGA_BLACK);
