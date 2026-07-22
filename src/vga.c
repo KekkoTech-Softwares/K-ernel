@@ -74,8 +74,15 @@ void vga_set_color(enum vga_color fg, enum vga_color bg)
     vga_attr = (uint8_t)fg | (uint8_t)(bg << 4);
 }
 
-void vga_init(void)
-{
+uint8_t vga_get_color(void) {
+    return vga_attr;
+}
+
+void vga_set_attr(uint8_t attr) {
+    vga_attr = attr;
+}
+
+void vga_init(void) {
     vga_row = 0;
     vga_column = 0;
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);

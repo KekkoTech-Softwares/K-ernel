@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: MIT
- * Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
+ * Copyright (c) 2026 KekkoTech Softwares Open Source Project (Matteo Checcacci)
  *
  * vga.h — text terminal on the VGA text buffer (0xB8000, 80x25).
  */
@@ -34,5 +34,7 @@ void vga_set_color(enum vga_color fg, enum vga_color bg);
 void vga_putchar(char c);
 void vga_write(const char *data, size_t size);
 void vga_puts(const char *str);
+uint8_t vga_get_color(void);
+void vga_set_attr(uint8_t attr);
 
 #endif /* VGA_H */

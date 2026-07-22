@@ -8,12 +8,27 @@
 
 #include <stddef.h>
 #include <stdarg.h>
+#include <stdint.h> //uint8_t to save VGA attribute
 
 #include "kprintf.h"
 #include "serial.h"
 #include "vga.h"
 
 static unsigned int kout_channels = KOUT_ALL;
+
+struct klog_style {
+    const char * tag;
+    enum vga_color fg;
+};
+
+static const struct klog_style klog_styles[] = {
+    [KLOG_DEBUG] = {"[ DBG  ] ", VGA_DARK_GREY},
+    [KLOG_INFO]  = {"[ INFO ] ", VGA_LIGHT_GREY},
+    [KLOG_WARN]  = {"[ WARN ] ", VGA_LIGHT_BROWN},
+    [KLOG_ERR]   = {"[ ERR  ] ", VGA_LIGHT_RED},
+};
+
+static enum klog_level klog_min = KLOG_DEBUG;
 
 /*PRINT-UINT: print an integer whithout sign in the indicated base (f.ex.: 10, 2, 16 ecc..)
 width is the minimum lenght. If the number is shorter it is filled on the left with the pad character. 
@@ -161,4 +176,25 @@ unsigned int kout_get(void) {
 
 void kout_set(unsigned int channels) {
     kout_channels = channels;
+}
+
+void klog_set_level(enum klog_level min) {
+    klog_min = min;
+}
+
+void klog(enum klog_level level, const char * fmt, ...) {
+    if(level < klog_min)
+        return;
+
+    const struct klog_style * style = &klog_styles[level];
+    uint8_t saved = vga_get_color();
+    va_list args;
+
+    vga_set_color(style->fg, VGA_BLACK);
+    kputs(style->tag);
+    vga_set_attr(saved);
+
+    va_start(args, fmt);
+    kvprintf(fmt, args);
+    va_end(args);
 }
