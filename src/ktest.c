@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: MIT
- * Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
+ * Copyright (c) 2026 KekkoTech Softwares Open Source Project (Matteo Checcacci)
  *
  * ktest.h — self tests executed at boot.
  */

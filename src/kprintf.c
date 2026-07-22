@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: MIT
- * Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
+ * Copyright (c) 2026 KekkoTech Softwares Open Source Project (Matteo Checcacci)
  *
  * kprintf.c — formatted kernel output.
  * All the kernel's output passes from kputchar, only point who knows 
@@ -58,8 +58,10 @@ static void print_int(int value) {
 
 
 void kputchar(char c) {
-    vga_putchar(c);
-    serial_putchar(c);
+    if(kout_channels & KOUT_VGA)
+        vga_putchar(c);
+    if(kout_channels & KOUT_SERIAL)
+        serial_putchar(c);
 }
 
 void kputs(const char *str) {
@@ -159,11 +161,4 @@ unsigned int kout_get(void) {
 
 void kout_set(unsigned int channels) {
     kout_channels = channels;
-}
-
-void kputchar(char c) {
-    if(kout_channels & KOUT_VGA)
-        vga_putchar(c);
-    if(kout_channels & KOUT_SERIAL)
-        serial_putchar(c);
 }

@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: MIT
- * Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
+ * Copyright (c) 2026 KekkoTech Softwares Open Source Project (Matteo Checcacci)
  *
  * kprintf.h — formatted kernel output.
  */
@@ -10,7 +10,6 @@
 #define KOUT_VGA (1u << 0)
 #define KOUT_SERIAL (1u << 1)
 #define KOUT_ALL (KOUT_VGA | KOUT_SERIAL)
-
 
 #include <stdarg.h>
 
