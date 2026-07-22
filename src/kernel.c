@@ -29,7 +29,7 @@ void kernel_main(uint32_t magic, uint32_t *mb_info)
     serial_init();
     vga_init();
 
-    kprintf("\n\n")
+    kprintf("\n\n");
     vga_set_color(VGA_LIGHT_CYAN, VGA_BLACK);
     kprintf(KERNEL_NAME " v" KERNEL_VERSION_STRING "\n");
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
