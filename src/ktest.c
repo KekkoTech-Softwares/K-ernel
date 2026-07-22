@@ -37,12 +37,12 @@ static void test_string(void) {
 
     CHECK(strlen("") == 0);
     CHECK(strcmp("abc", "abc") == 0);
-    CHECK(strcmp("abc", "abc") < 0);
-    CHECK(strcmp("abc", "abc") < 0);
+    CHECK(strcmp("abc", "abd") < 0);
+    CHECK(strcmp("abd", "abc") > 0);
 
     CHECK(memcmp("abc", "abc", 3) == 0);
-    CHECK(memcmp("abc", "abc", 3) != 0);
-    CHECK(memcmp("abc", "abc", 2) == 0); //stops at n byte
+    CHECK(memcmp("abc", "abd", 3) != 0);
+    CHECK(memcmp("abc", "abd", 2) == 0); //stops at n byte
 
     memcpy(b, "hello", 6);
     CHECK(strcmp(b, "hello") == 0);
