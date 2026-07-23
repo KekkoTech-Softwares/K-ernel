@@ -29,7 +29,9 @@ void kernel_main(uint32_t magic, uint32_t *mb_info)
     serial_init();
     vga_init();
 
-    kprintf("\n\n");
+    kinfo("K-ernel is starting...\n");
+
+    kprintf("\n");
     vga_set_color(VGA_LIGHT_CYAN, VGA_BLACK);
     kprintf(KERNEL_NAME " v" KERNEL_VERSION_STRING "\n");
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
@@ -37,8 +39,7 @@ void kernel_main(uint32_t magic, uint32_t *mb_info)
     kprintf("\n\n");
 
     // --- Ker Test ---
-    kprintf("I'm starting...\n");
-    kprintf("now i'll do some tests for verifiyng that everything is ok.\n");
+    kinfo("K-ernel self-test is starting...\n");
     unsigned int saved = kout_get(); //save status
     kout_set(KOUT_SERIAL); //switch to serial
     ktest_run();
