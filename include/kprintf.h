@@ -10,6 +10,8 @@
 
 #include <stdarg.h>
 
+#include "vga.h"
+
 //Output channels: one bit each, so they can be combined with |.
 #define KOUT_VGA (1u << 0)
 #define KOUT_SERIAL (1u << 1)
@@ -27,9 +29,11 @@ enum klog_level {
 };
 
 void kputchar(char c);
-void kputs(const char *str);
-void kvprintf(const char *fmt, va_list args);
-void kprintf(const char *fmt, ...);
+void kputs(const char * str);
+void kvprintf(const char * fmt, va_list args);
+void kprintf(const char * fmt, ...);
+void kset_color(enum vga_color fg, enum vga_color bg);
+void kprintf_color(enum vga_color fg, enum vga_color bg, const char * fmt, ...);
 
 unsigned int kout_get(void);
 void kout_set(unsigned int channels);

@@ -16,6 +16,12 @@
 
 static unsigned int kout_channels = KOUT_ALL;
 
+//VGA index -> ansi. (conversion with a table because of different order)
+static const unsigned char ansi_fg[16] = {
+    30, 34, 32, 36, 31, 35, 33, 37,
+    90, 94, 92, 96, 91, 95, 93, 97,
+};
+
 struct klog_style {
     const char * tag;
     enum vga_color fg;
@@ -91,6 +97,23 @@ static void print_bits(unsigned int value, int bits, int group) {
         if(group > 0 && i > 0 && i % group == 0)
             kputchar('_');
     }
+}
+
+static void serial_ansi_color(enum vga_color fg) {
+    unsigned char code = ansi_fg[fg];
+
+    serial_putchar('\x1b');
+    serial_putchar('[');
+    serial_putchar((char)('0' + code / 10)); //always 2 digits 
+    serial_putchar((char)('0' + code % 10));
+    serial_putchar('m');
+}
+
+static void serial_ansi_reset(void) {
+    serial_putchar('\x1b');
+    serial_putchar('[');
+    serial_putchar('0');
+    serial_putchar('m');
 }
 
 void kvprintf(const char *fmt, va_list args) {
@@ -170,6 +193,29 @@ void kprintf(const char * fmt, ...) {
     va_end(args);
 }
 
+void kset_color(enum vga_color fg, enum vga_color bg) {
+    vga_set_color(fg, bg);
+
+    if(kout_channels & KOUT_SERIAL)
+        serial_ansi_color(fg);
+}
+
+void kprintf_color(enum vga_color fg, enum vga_color bg, const char * fmt, ...) {
+    uint8_t saved = vga_get_color();
+    va_list args;
+
+    kset_color(fg, bg);
+
+    va_start(args, fmt);
+    kvprintf(fmt, args);
+    va_end(args);
+
+    vga_set_attr(saved);
+
+    if(kout_channels & KOUT_SERIAL)
+        serial_ansi_reset();
+}
+
 unsigned int kout_get(void) {
     return kout_channels;
 }
@@ -190,9 +236,10 @@ void klog(enum klog_level level, const char * fmt, ...) {
     uint8_t saved = vga_get_color();
     va_list args;
 
-    vga_set_color(style->fg, VGA_BLACK);
+    kset_color(style->fg, VGA_BLACK);
     kputs(style->tag);
     vga_set_attr(saved);
+    serial_ansi_reset();
 
     va_start(args, fmt);
     kvprintf(fmt, args);
