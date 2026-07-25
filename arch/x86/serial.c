@@ -1,4 +1,4 @@
-/* SPDX-License-Identifier: MIT
+/* SPDX-License-Identifier: GPL-2.0-only
  * Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
  *
  * serial.c — minimal driver for the COM1 serial port (0x3F8).

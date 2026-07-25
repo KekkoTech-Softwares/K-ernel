@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: GPL-2.0-only
 # Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
 #
 # Makefile — builds the kernel, creates the ISO and runs it under QEMU.
@@ -10,41 +10,60 @@ TARGET  := i686-elf
 CC      := $(TARGET)-gcc
 AS      := nasm
 
+# The architecture we build for. Selects arch/$(ARCH): its sources, its
+# private headers and its linker script. Portability (x86-64/ARM/RISC-V)
+# starts here — the rest of the build is architecture-agnostic.
+ARCH    := x86
+
 BUILD   := build
-SRC     := src
 ISODIR  := $(BUILD)/isodir
+
+# Where sources live. "kernel/" is generic, architecture-independent code;
+# "arch/$(ARCH)/" is the machine-specific part (boot, VGA, serial, port I/O).
+KERNEL_DIR := kernel
+ARCH_DIR   := arch/$(ARCH)
+
+LINKER  := $(ARCH_DIR)/linker.ld
 
 KERNEL  := $(BUILD)/kernel.bin
 ISO     := $(BUILD)/k-ernel.iso
 
+# -Iinclude holds the generic public headers only. Architecture-private
+# headers (io.h) live in arch/$(ARCH) and are added, further down, *only*
+# to the arch objects — so generic code cannot include io.h by accident.
 # -ffreestanding: no libc, no assumptions about an underlying OS.
 # -fno-stack-protector: the canary needs runtime support that does not exist.
 CFLAGS  := -std=gnu99 -ffreestanding -O2 -Wall -Wextra -Iinclude \
            -fno-stack-protector -fno-builtin
 ASFLAGS := -f elf32
 # -lgcc: compiler support routines, such as 64-bit division.
-LDFLAGS := -T linker.ld -ffreestanding -O2 -nostdlib
+LDFLAGS := -T $(LINKER) -ffreestanding -O2 -nostdlib
 
-C_SOURCES   := $(wildcard $(SRC)/*.c)
-ASM_SOURCES := $(wildcard $(SRC)/*.s)
-OBJS        := $(patsubst $(SRC)/%.c,$(BUILD)/%.o,$(C_SOURCES)) \
-               $(patsubst $(SRC)/%.s,$(BUILD)/%.o,$(ASM_SOURCES))
+C_SOURCES   := $(wildcard $(KERNEL_DIR)/*.c) $(wildcard $(ARCH_DIR)/*.c)
+ASM_SOURCES := $(wildcard $(ARCH_DIR)/*.s)
+# Object files mirror the source tree under build/ (e.g. build/arch/x86/vga.o),
+# so sources from different directories never collide.
+OBJS        := $(patsubst %.c,$(BUILD)/%.o,$(C_SOURCES)) \
+               $(patsubst %.s,$(BUILD)/%.o,$(ASM_SOURCES))
 DEPS        := $(OBJS:.o=.d)
+
+# Architecture-private include path: granted only to arch objects, so the
+# machine-independent code in kernel/ physically cannot reach io.h.
+$(BUILD)/$(ARCH_DIR)/%.o: CFLAGS += -I$(ARCH_DIR)
 
 .PHONY: all iso run run-vga debug clean check
 
 all: $(KERNEL)
 
-$(BUILD):
-	mkdir -p $(BUILD)
-
-$(BUILD)/%.o: $(SRC)/%.c | $(BUILD)
+$(BUILD)/%.o: %.c
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -MMD -MP -c $< -o $@
 
-$(BUILD)/%.o: $(SRC)/%.s | $(BUILD)
+$(BUILD)/%.o: %.s
+	@mkdir -p $(dir $@)
 	$(AS) $(ASFLAGS) $< -o $@
 
-$(KERNEL): $(OBJS) linker.ld
+$(KERNEL): $(OBJS) $(LINKER)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) -lgcc
 	@grub-file --is-x86-multiboot $@ \
 		&& echo "OK: valid Multiboot header" \

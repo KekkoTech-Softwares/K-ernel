@@ -1,5 +1,5 @@
-/* SPDX-License-Identifier: MIT
- * Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
+/* SPDX-License-Identifier: GPL-2.0-only
+ * Copyright (c) 2026 KekkoTech Softwares Open Source Project (Matteo Checcacci)
  *
  * vga.c — text terminal on the VGA text buffer.
  *

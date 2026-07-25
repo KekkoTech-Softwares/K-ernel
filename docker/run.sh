@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# SPDX-License-Identifier: MIT
+# SPDX-License-Identifier: GPL-2.0-only
 # Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
 #
 # Builds the image if needed and opens a shell in the K-ernel toolchain
