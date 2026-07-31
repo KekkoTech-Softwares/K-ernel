@@ -8,6 +8,6 @@
 #define KTEST_H
 
 //runs every suite. returns number of failed checks.
-void ktest_run(void);
+int ktest_run(void);
 
 #endif //KTEST_H

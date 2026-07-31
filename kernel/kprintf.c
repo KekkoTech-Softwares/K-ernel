@@ -65,13 +65,39 @@ static void print_uint(unsigned int value, unsigned int base, int width, char pa
     }
 }
 
-//PRINT_INT: print integer base 10 with sign
-static void print_int(int value) {
-    unsigned int u = (unsigned int)value;
+//number of digits of value in the given base
+static int uint_len(unsigned int value, unsigned int base) {
+    int len = 1;
 
-    if(value < 0) {
-        kputchar('-');
+    while(value >= base) {
+        value /= base;
+        len++;
+    }
+    return len;
+}
+
+//PRINT_INT: print integer base 10 with sign
+static void print_int(int value, int width, char pad) {
+    unsigned int u = (unsigned int)value;
+    int negative = (value < 0);
+    int len;
+
+    if(negative)
         u = -u;
+
+    len = uint_len(u, 10) + (negative ? 1 : 0);
+
+    if(pad == '0') {
+            if(negative)
+                kputchar('-');
+            for(int i = len; i < width; i++)
+                kputchar('0');
+    }
+    else {
+        for(int i = len; i < width; i++)
+            kputchar(' ');
+        if(negative)
+            kputchar('-');
     }
 
     print_uint(u, 10, 0, ' ', 0);
@@ -147,7 +173,7 @@ void kvprintf(const char *fmt, va_list args) {
         switch(fmt[i]) {
             case 'd':
             case 'i':
-                print_int(va_arg(args, int));
+                print_int(va_arg(args, int), width, pad);
                 break;
             case 'u':
                 print_uint(va_arg(args, unsigned int), 10, width, pad, 0);

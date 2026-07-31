@@ -100,7 +100,7 @@ static const struct ktest_suite suites[] = {
 
 #define KTEST_SUITE_COUNT (sizeof suites / sizeof suites[0])
 
-void ktest_run(void) {
+int ktest_run(void) {
     checks = 0;
     failed = 0;
 
