@@ -9,6 +9,7 @@
 #define KPRINTF_H
 
 #include <stdarg.h>
+#include <stddef.h>
 
 #include "vga.h"
 
@@ -29,6 +30,7 @@ enum klog_level {
 };
 
 void kputchar(char c);
+int ksnprintf(char * buf, size_t size, const char * fmt, ...);
 void kputs(const char * str);
 void kvprintf(const char * fmt, va_list args);
 void kprintf(const char * fmt, ...);
