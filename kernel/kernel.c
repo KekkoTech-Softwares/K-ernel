@@ -11,6 +11,7 @@
 
 #include <stdint.h>
 
+#include "arch.h"
 #include "kprintf.h"
 #include "ktest.h"
 #include "string.h"
@@ -28,6 +29,7 @@ void kernel_main(uint32_t magic, uint32_t *mb_info)
     (void)mb_info; /* I'll need this memory map during phase 4 (PMM) */
     serial_init();
     vga_init();
+    arch_init();
 
     kinfo("K-ernel is starting...\n");
 
