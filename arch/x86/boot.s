@@ -31,6 +31,7 @@ stack_top:
 
 section .text
 global _start
+global stacl_top
 extern kernel_main
 
 _start:
