@@ -103,12 +103,53 @@ static void print_int(int value, int width, char pad) {
     print_uint(u, 10, 0, ' ', 0);
 }
 
+//when set, kputchar sends everything here instead of the devide.
+//used by ksnprintf to capture the output into buffer
+static void (* kout_sink)(char);
 
 void kputchar(char c) {
+
+    if(kout_sink) {
+        kout_sink(c);
+        return;
+    }
+
     if(kout_channels & KOUT_VGA)
         vga_putchar(c);
     if(kout_channels & KOUT_SERIAL)
         serial_putchar(c);
+}
+
+static char * snp_buf;
+static size_t snp_len; //chars produced, trunc. included
+static size_t snp_cap;
+
+static void snp_sink(char c) {
+    //leave space for terminating NUL.
+    if(snp_len + 1 < snp_cap)
+        snp_buf[snp_len] = c;
+
+    snp_len++;
+}
+
+int ksnprintf(char * buf, size_t size, const char * fmt, ...) {
+    va_list args;
+
+    snp_buf = buf;
+    snp_len = 0;
+    snp_cap = size;
+    kout_sink = snp_sink;
+
+    va_start(args, fmt);
+    kvprintf(fmt, args);
+    va_end(args);
+
+    kout_sink = NULL;
+
+    if(size > 0)
+        buf[snp_len < size ? snp_len : size - 1] = '\0';
+
+    return (int)snp_len;
 }
 
 void kputs(const char *str) {

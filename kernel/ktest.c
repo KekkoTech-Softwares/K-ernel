@@ -4,7 +4,7 @@
  * ktest.h — self tests executed at boot.
  */
 
- #include <stddef.h>
+#include <stddef.h>
 
 #include "ktest.h"
 #include "kprintf.h"
@@ -26,7 +26,7 @@ static int suite_failed;
         } else {                                               \
             failed++;                                          \
             suite_failed++;                                     \
-            kerr("\n%s%d  %s\n", __FILE__, __LINE__, #cond);    \
+            kerr("\n%s:%d  %s\n", __FILE__, __LINE__, #cond);   \
         }                                                      \
     } while (0)
 
@@ -42,6 +42,41 @@ static void print_padded(const char * s, int width) {
 
     for(; n < width; n++)
         kputchar(' ');
+}
+
+static void test_kprintf(void) {
+    char b[64];
+
+    CHECK(ksnprintf(b, sizeof b, "%d", 0) == 1 && strcmp(b, "0") == 0);
+    CHECK(ksnprintf(b, sizeof b, "%d", -42) == 3 && strcmp(b, "-42") == 0);
+
+    ksnprintf(b, sizeof b, "%d", -2147483647 - 1);
+    CHECK(strcmp(b, "-2147483648") == 0);
+
+    ksnprintf(b, sizeof b, "%u", 4294967295u);
+    CHECK(strcmp(b, "4294967295") == 0);
+
+    ksnprintf(b, sizeof b, "%x|%X|%08x", 0xdeadbeefu, 0xdeadbeefu, 0x1234u);
+    CHECK(strcmp(b, "deadbeef|DEADBEEF|00001234") == 0);
+
+    ksnprintf(b, sizeof b, "%b|%08b|%8b", 5u, 5u, 5u);
+    CHECK(strcmp(b, "101|00000101|     101") == 0);
+
+    ksnprintf(b, sizeof b, "[%s][%c]%%", "ciao", 'K');
+    CHECK(strcmp(b, "[ciao][K]%") == 0);
+
+    ksnprintf(b, sizeof b, "%p", (void *)0xB8000);
+    CHECK(strcmp(b, "0x000B8000") == 0);
+
+    ksnprintf(b, sizeof b, "[%5d][%05d]", -42, -42);
+    CHECK(strcmp(b, "[  -42][-0042]") == 0);
+
+    // Truncation: the return value is what wuold have been written. 
+    CHECK(ksnprintf(b, 4, "abcdef") == 6 && strcmp(b, "abc") == 0);
+
+    // A lone trailing '%' must not read past the string. 
+    ksnprintf(b, sizeof b, "fine%");
+    CHECK(strcmp(b, "fine") == 0);
 }
 
 static void test_string(void) {
@@ -90,6 +125,9 @@ struct ktest_suite {
 };
 
 static const struct ktest_suite suites[] = {
+    {
+        "kprintf", test_kprintf
+    },
     {
         "string", test_string
     },
