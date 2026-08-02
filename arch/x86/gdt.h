@@ -57,7 +57,7 @@ struct tss_entry {
     uint32_t eax, ecx, edx, ebx;
     uint32_t esp, ebp, esi, edi;
     uint32_t es, cs, ss, ds, fs, gs;
-    uin t32_t ldt;
+    uint32_t ldt;
     uint32_t trap;
     uint32_t iomap_base;
 } __attribute__((packed));
