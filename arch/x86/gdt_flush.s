@@ -12,7 +12,7 @@ gdt_flush:
     mov eax, [esp + 4]      ; cdecl: first argument, past the return gdtr_address
     lgdt [eax]
 
-    ; the data segment registers keep their old stale contents until they are written again. 0x10 is the kernel data sector.
+    ; the data segment registers keep their old stale contents until they are written again. 0x10 is the kernel data selector.
     mov ax, 0x10
     mov ds, ax
     mov es, ax
@@ -20,15 +20,15 @@ gdt_flush:
     mov gs, ax
     mov ss, ax
 
-    ; cs cannot be assigned: the only way to chamnge it is performing a far jump
-    ; which loads selector and offset toghether. 0x08 is the kernel code selector.
-    jmp 0x08:.reload:cs
+    ; cs cannot be assigned: the only way to change it is performing a far jump
+    ; which loads selector and offset together. 0x08 is the kernel code selector.
+    jmp 0x08:.reload_cs
 
 .reload_cs:
     ret
 
 ; void tss_flush(void);
 tss_flush:
-    mov ax 0x2B ; tss selector, RPL 3
+    mov ax, 0x2B ; tss selector, RPL 3
     ltr ax
     ret

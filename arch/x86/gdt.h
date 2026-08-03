@@ -58,8 +58,10 @@ struct tss_entry {
     uint32_t esp, ebp, esi, edi;
     uint32_t es, cs, ss, ds, fs, gs;
     uint32_t ldt;
-    uint32_t trap;
-    uint32_t iomap_base;
+    //these two are 16 bit, not 32: the CPU reads iomap_base at the fixed
+    //offset 102, so a wrong width here silently moves it out of place.
+    uint16_t trap;
+    uint16_t iomap_base;
 } __attribute__((packed));
 
 void gdt_init(void);
