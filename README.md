@@ -28,7 +28,7 @@ the serial port.
 
 - [x] **Phase 0** — development environment (cross-compiled toolchain)
 - [x] **Phase 1** — boot via GRUB/Multiboot, VGA and serial output
-- [ ] **Phase 2** — GDT (segmentation)
+- [x] **Phase 2** — GDT and TSS (segmentation)
 - [ ] **Phase 3** — IDT, exceptions and hardware interrupts (timer, keyboard)
 - [ ] **Phase 4** — memory management (PMM, paging, heap)
 - [ ] **Phase 5** — multitasking
@@ -104,13 +104,18 @@ gdb build/kernel.bin -ex 'target remote :1234' -ex 'break kernel_main' -ex conti
 arch/x86/boot.s      Multiboot header, initial stack, entry point (_start)
 arch/x86/vga.c       80x25 terminal on the VGA text buffer at 0xB8000
 arch/x86/serial.c    COM1 serial port driver, used for logs
+arch/x86/gdt.c       GDT and TSS: segment descriptors handed to the CPU
+arch/x86/gdt_flush.s lgdt, the far jump that reloads cs, and ltr
+arch/x86/gdt_test.c  Self tests that read cs, ds, tr and the GDTR back
+arch/x86/gdt.h       Descriptor layouts and selectors — x86-private
+arch/x86/arch.c      Implements arch_init(): what this machine sets up at boot
 arch/x86/io.h        Port I/O (inb/outb) — x86-private; generic code never includes it
 arch/x86/linker.ld   Memory layout: the kernel is loaded at 1 MiB
 kernel/kernel.c      kernel_main: first C code that runs
 kernel/kprintf.c     Formatted output, log levels, output channels
 kernel/string.c      Freestanding string/memory helpers
 kernel/ktest.c       Boot-time self-test suite
-include/             Generic public headers (kprintf.h, string.h, vga.h, ...)
+include/             Generic public headers (arch.h, kprintf.h, string.h, vga.h, ...)
 grub.cfg             GRUB menu entry to boot the kernel
 Makefile             Build, ISO generation and QEMU launch
 docker/              Cross-compilation toolchain image
@@ -181,7 +186,7 @@ i log sulla porta seriale.
 
 - [x] **Fase 0** — ambiente di sviluppo (toolchain cross-compilata)
 - [x] **Fase 1** — boot via GRUB/Multiboot, output VGA e seriale
-- [ ] **Fase 2** — GDT (segmentazione)
+- [x] **Fase 2** — GDT e TSS (segmentazione)
 - [ ] **Fase 3** — IDT, eccezioni e interrupt hardware (timer, tastiera)
 - [ ] **Fase 4** — gestione della memoria (PMM, paging, heap)
 - [ ] **Fase 5** — multitasking
@@ -260,13 +265,18 @@ gdb build/kernel.bin -ex 'target remote :1234' -ex 'break kernel_main' -ex conti
 arch/x86/boot.s      Header Multiboot, stack iniziale, entry point (_start)
 arch/x86/vga.c       Terminale 80x25 sul VGA text buffer a 0xB8000
 arch/x86/serial.c    Driver della porta seriale COM1, usata per i log
+arch/x86/gdt.c       GDT e TSS: i descrittori di segmento passati alla CPU
+arch/x86/gdt_flush.s lgdt, il far jump che ricarica cs, e ltr
+arch/x86/gdt_test.c  Self test che rileggono cs, ds, tr e il GDTR dalla CPU
+arch/x86/gdt.h       Layout dei descrittori e selettori — privato x86
+arch/x86/arch.c      Implementa arch_init(): cosa prepara al boot questa macchina
 arch/x86/io.h        Port I/O (inb/outb) — privato x86; il codice generico non lo include mai
 arch/x86/linker.ld   Layout di memoria: il kernel viene caricato a 1 MiB
 kernel/kernel.c      kernel_main: primo codice C eseguito
 kernel/kprintf.c     Output formattato, livelli di log, canali di output
 kernel/string.c      Helper freestanding per stringhe/memoria
 kernel/ktest.c       Suite di self test al boot
-include/             Header pubblici generici (kprintf.h, string.h, vga.h, ...)
+include/             Header pubblici generici (arch.h, kprintf.h, string.h, vga.h, ...)
 grub.cfg             Voce di menu di GRUB per avviare il kernel
 Makefile             Build, generazione della ISO e avvio di QEMU
 docker/              Immagine con la toolchain di cross-compilazione
