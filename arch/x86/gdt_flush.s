@@ -12,6 +12,12 @@ gdt_flush:
     mov eax, [esp + 4]      ; cdecl: first argument, past the return gdtr_address
     lgdt [eax]
 
+    ; Multiboot says nothing about ldtr, and the GDT it hands over may itself
+    ; be invalid. Nothing here uses a local descriptor table, so load the null
+    ; selector instead of inheriting whatever happened to be there.
+    xor ax, ax
+    lldt ax
+
     ; the data segment registers keep their old stale contents until they are written again. 0x10 is the kernel data selector.
     mov ax, 0x10
     mov ds, ax
@@ -29,6 +35,6 @@ gdt_flush:
 
 ; void tss_flush(void);
 tss_flush:
-    mov ax, 0x2B ; tss selector, RPL 3
+    mov ax, 0x28 ; tss selector, RPL 0 (see GDT_TSS in gdt.h)
     ltr ax
     ret

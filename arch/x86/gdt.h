@@ -21,7 +21,10 @@
 #define GDT_KERNEL_DATA 0x10
 #define GDT_USER_CODE   0x1B    //0x18 | 3
 #define GDT_USER_DATA   0x23    //0x20 | 3
-#define GDT_TSS         0x2B    //0x28 | 3
+//the TSS selector keeps RPL 0: ltr does not compare RPL with the DPL, so a
+//requested privilege level here would be noise — and VMX host state, one day,
+//requires RPL 0 on TR.
+#define GDT_TSS         0x28
 
 //__attribute((packed))__ is necessary. Without this gcc allign byite (?) as it wants.
 //if struct gdt_entry is not 8 bytes in the right order, lgdt load trash and the machine restars (?)
@@ -66,5 +69,16 @@ struct tss_entry {
 
 void gdt_init(void);
 void tss_set_stack(uint32_t esp0);
+
+//What the CPU really holds, as opposed to what gdt.c wrote into its tables.
+//Implemented in gdt.c, the only place that may touch these instructions.
+uint16_t gdt_read_cs(void);
+uint16_t gdt_read_ds(void);
+uint16_t gdt_read_tr(void);
+void gdt_read_gdtr(struct gdt_ptr * out);
+
+//Self test suite for this module. Implemented in gdt_test.c and handed to
+//ktest by arch_init().
+void test_gdt(void);
 
 #endif //GDT_H

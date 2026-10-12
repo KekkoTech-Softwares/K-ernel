@@ -63,3 +63,44 @@ void gdt_init(void) {
     gdt_flush((uint32_t)&gdtr);
     tss_flush();
 }
+
+/* --- readback helpers, used by the self tests in gdt_test.c ---------------
+ *
+ * Everything above describes what this file *wrote into memory*. A descriptor
+ * can be perfectly built and still never reach the CPU, so the only honest
+ * check is to ask the hardware what it is actually using.
+ */
+
+//cs can be read with a plain mov: it is only *writing* it that needs a far jump.
+uint16_t gdt_read_cs(void) {
+    uint16_t cs;
+
+    //"=r" moves the segment register into a general purpose one; the uint16_t
+    //makes gcc print its 16 bit name, the only width this mov form accepts.
+    __asm__ volatile("mov %%cs, %0" : "=r"(cs));
+
+    return cs;
+}
+
+uint16_t gdt_read_ds(void) {
+    uint16_t ds;
+
+    __asm__ volatile("mov %%ds, %0" : "=r"(ds));
+
+    return ds;
+}
+
+//str stores the task register, that is the selector ltr loaded, into a register.
+uint16_t gdt_read_tr(void) {
+    uint16_t tr;
+
+    __asm__ volatile("str %0" : "=r"(tr));
+
+    return tr;
+}
+
+//sgdt dumps the 6 bytes of the GDTR and has no register form, so the operand
+//has to be memory: "=m" on the pointed-to struct, not "=r" on the pointer.
+void gdt_read_gdtr(struct gdt_ptr * out) {
+    __asm__ volatile("sgdt %0" : "=m"(*out));
+}

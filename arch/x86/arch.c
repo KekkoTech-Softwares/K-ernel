@@ -6,7 +6,12 @@
 
 #include "arch.h"
 #include "gdt.h"
+#include "ktest.h"
 
 void arch_init(void) {
     gdt_init();
+
+    //ktest_run() runs later, in kernel_main: registering the suite here is
+    //enough, and keeps the machine specific tests out of kernel/ktest.c.
+    ktest_register("gdt", test_gdt);
 }
