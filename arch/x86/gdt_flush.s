@@ -1,5 +1,5 @@
 ; SPDX-License-Identifier: GPL-2.0-only
-; Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
+; Copyright (c) 2026 KekkoTech Softwares (Matteo Checcacci)
 ;
 ; gdt_flush.s — loads the GDT and reloads the segment registers.
 

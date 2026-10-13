@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-only
-# Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
+# Copyright (c) 2026 KekkoTech Softwares (Matteo Checcacci)
 #
 # K-ernel toolchain: i686-elf cross-compiler + NASM + QEMU + GRUB + xorriso + GDB.
 # See guide.md, phase 0.

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-2.0-only
-# Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
+# Copyright (c) 2026 KekkoTech Softwares (Matteo Checcacci)
 #
 # Builds the image if needed and opens a shell in the K-ernel toolchain
 # container. The project is mounted at /kernel inside the container, so edits

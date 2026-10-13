@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0-only
-# Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
+# Copyright (c) 2026 KekkoTech Softwares (Matteo Checcacci)
 #
 # Makefile — builds the kernel, creates the ISO and runs it under QEMU.
 #

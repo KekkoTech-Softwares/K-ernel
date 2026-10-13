@@ -159,8 +159,8 @@ Every source file carries an [SPDX](https://spdx.dev/) identifier at the top,
 so the license stays attached to each file even when extracted from the
 project.
 
-Created and maintained by **KekkoTech Softwares Open Source**.
-Copyright © 2026 KekkoTech Softwares Open Source (Matteo Checcacci).
+Created and maintained by **KekkoTech Softwares**.
+Copyright © 2026 KekkoTech Softwares (Matteo Checcacci).
 
 ---
 
@@ -321,5 +321,5 @@ Ogni file sorgente riporta in testa un identificatore [SPDX](https://spdx.dev/),
 così la licenza resta associata al singolo file anche se viene estratto dal
 progetto.
 
-Creato e mantenuto da **KekkoTech Softwares Open Source**.
-Copyright © 2026 KekkoTech Softwares Open Source (Matteo Checcacci).
+Creato e mantenuto da **KekkoTech Softwares**.
+Copyright © 2026 KekkoTech Softwares (Matteo Checcacci).
