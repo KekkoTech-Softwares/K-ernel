@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-2.0-only
- * Copyright (c) 2026 KekkoTech Softwares Open Source Project (Matteo Checcacci)
+ * Copyright (c) 2026 KekkoTech Softwares (Matteo Checcacci)
  *
  * kernel.c — the kernel's C entry point.
  *
@@ -66,8 +66,10 @@ void kernel_main(uint32_t magic, uint32_t *mb_info)
 
     vga_set_color(VGA_LIGHT_GREY, VGA_BLACK);
 
-    /* Nothing left to schedule, so halt the CPU. `hlt` parks it until the
-     * next interrupt instead of burning a core on an empty loop. */
+    /* Nothing left to schedule, so halt the CPU: arch_halt() parks it until
+     * the next interrupt instead of burning a core on an empty loop. How it
+     * does that is the architecture's business — this was the last line of
+     * assembly left in generic code. */
     for (;;)
-        __asm__ volatile("hlt");
+        arch_halt();
 }

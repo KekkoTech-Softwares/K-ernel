@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-2.0-only
- * Copyright (c) 2026 KekkoTech Softwares Open Source Project (Matteo Checcacci)
+ * Copyright (c) 2026 KekkoTech Softwares (Matteo Checcacci)
  *
  * kprintf.h — formatted kernel output.
  */
@@ -39,6 +39,10 @@ void kprintf_color(enum vga_color fg, enum vga_color bg, const char * fmt, ...);
 
 unsigned int kout_get(void);
 void kout_set(unsigned int channels);
+
+/* Stops capturing into a buffer, if a ksnprintf was in progress. Only the
+ * panic path needs this: everything it prints must reach a device. */
+void kout_detach_sink(void);
 
 void klog(enum klog_level level, const char * fmt, ...);
 void klog_set_level(enum klog_level min);

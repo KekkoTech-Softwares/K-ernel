@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-2.0-only
- * Copyright (c) 2026 KekkoTech Softwares Open Source Project (Matteo Checcacci)
+ * Copyright (c) 2026 KekkoTech Softwares (Matteo Checcacci)
  *
  * kprintf.c — formatted kernel output.
  * All the kernel's output passes from kputchar, only point who knows 
@@ -289,6 +289,10 @@ unsigned int kout_get(void) {
 
 void kout_set(unsigned int channels) {
     kout_channels = channels;
+}
+
+void kout_detach_sink(void) {
+    kout_sink = NULL;
 }
 
 void klog_set_level(enum klog_level min) {
