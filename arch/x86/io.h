@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: GPL-2.0-only
- * Copyright (c) 2026 KekkoTech Softwares Open Source (Matteo Checcacci)
+ * Copyright (c) 2026 KekkoTech Softwares (Matteo Checcacci)
  *
  * io.h — x86 port I/O access.
  *
@@ -27,6 +27,18 @@ static inline uint8_t inb(uint16_t port)
     uint8_t value;
     __asm__ volatile("inb %1, %0" : "=a"(value) : "Nd"(port));
     return value;
+}
+
+/* An `out` retires as soon as the bus has taken the byte, while the device
+ * may still be busy with it: old peripherals need the bus to idle in between
+ * two accesses or they drop the second one. The 8259 interrupt controller is
+ * the classic victim, which is why its init sequence is written one control
+ * word at a time with this in the middle. Port 0x80 is the POST diagnostic
+ * latch, unused once the BIOS has handed over, so writing to it is a harmless
+ * way to spend one bus cycle doing nothing. */
+static inline void io_wait(void)
+{
+    outb(0x80, 0);
 }
 
 #endif /* IO_H */
