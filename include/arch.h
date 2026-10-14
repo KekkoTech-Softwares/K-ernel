@@ -62,9 +62,34 @@ void arch_irq_eoi(unsigned irq);
  * one day preemptive scheduling possible.
  */
 
-/* Starts ticking hz times per second. hz must be in [1, 1000]: zero has no
- * meaning and the hardware divisor has a floor, so a value outside the range
- * is a programming error, same as a bad irq. */
+/* Starts ticking hz times per second. Requires arch_init(): it opens an
+ * interrupt line, which before then would mean a controller nobody has
+ * programmed and no table to dispatch through — the first tick would be a
+ * triple fault. Call it once, at boot: changing the rate afterwards is not
+ * supported today, and a second call panics rather than let time appear to
+ * jump backwards for whoever already read the counter.
+ *
+ * [1, 1000] is what a caller may *ask for*; outside it is a programming
+ * error, same as a bad irq, and panics. Inside it, what the caller gets is
+ * **the closest rate that is not slower** than the one asked for: the
+ * direction is the whole point, because rounding up makes every timeout built
+ * on the tick expire early rather than late, and nothing waits forever.
+ *
+ * Only a rate the machine cannot produce *at all* — below its own floor —
+ * reaches the log. The rounding inside the range does not: at 100 Hz the
+ * x86 divisor gives 100.0068 Hz, an error of 68 parts per million, and a
+ * warning on every boot about that would train everyone to ignore warnings.
+ *
+ * Why not promise the exact number: on x86 the 8254 takes a 16-bit divisor,
+ * so it cannot tick slower than 18.2 times a second — 1 Hz is honoured as
+ * 18.2 Hz. That is one chip's limit, not an interface's: ARM and RISC-V
+ * timers really do 1 Hz, and carving a 1981 part's floor into a portable
+ * header would be the wrong trade.
+ *
+ * The day a caller computes a deadline from the hz it asked for, the
+ * difference has to become visible in *code* and not only in the log — a
+ * return value with the real rate, or an arch_timer_hz(). Not today: nothing
+ * reads it, and an interface with no caller is a guess about the future. */
 void arch_timer_init(unsigned hz);
 
 /* Ticks since arch_timer_init(). Safe to call with interrupts enabled: the

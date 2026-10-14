@@ -9,6 +9,7 @@
 #include "idt.h"
 #include "ktest.h"
 #include "pic.h"
+#include "pit.h"
 
 void arch_init(void) {
     gdt_init();
@@ -27,4 +28,5 @@ void arch_init(void) {
     ktest_register("gdt", test_gdt);
     ktest_register("pic", test_pic);
     ktest_register("idt", test_idt);
+    ktest_register("pit", test_pit);
 }

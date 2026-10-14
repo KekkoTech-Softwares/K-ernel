@@ -43,12 +43,6 @@ static struct {
     void * ctx;
 } irq_handlers[PIC_IRQ_COUNT];
 
-/* Interrupts taken on a line nobody claimed. Not a panic, not even a warning
- * printed from the handler: one noise pulse on a floating ISA line would then
- * be enough to stop the machine, or to flood the console from inside an
- * interrupt. Counted and dropped. */
-static unsigned irq_nohandler;
-
 /* The names the CPU's own manual uses (Intel SDM Vol.3, "Exception and
  * Interrupt Vectors"). Worth the 32 pointers: "exception 13" means nothing at
  * three in the morning, "#GP general protection" says where to look. */
@@ -214,10 +208,12 @@ void isr_dispatch(struct regs * r) {
         //validated above, so the subtraction cannot wrap into the array
         unsigned irq = r->vector - PIC_VECTOR_BASE;
 
+        /* A line nobody claimed is dropped in silence: one noise pulse on a
+         * floating ISA input must not stop the machine, nor print from inside
+         * an interrupt. Not counted either — the count would come with the
+         * spurious check this dispatcher still owes (K-012), and its reader. */
         if (irq_handlers[irq].fn)
             irq_handlers[irq].fn(irq_handlers[irq].ctx);
-        else
-            irq_nohandler++;
 
         /* Always acknowledged, handler or not: a line left in service blocks
          * itself and every lower priority one from then on. pic_eoi() knows
