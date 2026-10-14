@@ -24,14 +24,18 @@ ARM or RISC-V later does not mean rewriting everything.
 ### Status
 
 The kernel boots, prints to the screen through the VGA text buffer and logs to
-the serial port.
+the serial port. It installs its own GDT and IDT, turns an unhandled CPU
+exception into a register dump and a halt instead of a silent reset, and keeps
+time on the 8254 at 100 Hz. Every boot runs a self-test suite that asks the
+hardware what it actually loaded.
 
 - [x] **Phase 0** — development environment (cross-compiled toolchain)
 - [x] **Phase 1** — boot via GRUB/Multiboot, VGA and serial output
 - [x] **Phase 2** — GDT and TSS (segmentation)
-- [ ] **Phase 3** — IDT, exceptions and hardware interrupts (timer, keyboard)
+- [ ] **Phase 3** — IDT, exceptions and hardware interrupts (timer done, keyboard next)
 - [ ] **Phase 4** — memory management (PMM, paging, heap)
 - [ ] **Phase 5** — multitasking
+- [ ] **Phase 6** — drivers and filesystem
 
 ### Requirements
 
@@ -108,12 +112,23 @@ arch/x86/gdt.c       GDT and TSS: segment descriptors handed to the CPU
 arch/x86/gdt_flush.s lgdt, the far jump that reloads cs, and ltr
 arch/x86/gdt_test.c  Self tests that read cs, ds, tr and the GDTR back
 arch/x86/gdt.h       Descriptor layouts and selectors — x86-private
+arch/x86/idt.c       IDT, the dispatcher, and the arch half of the interrupt API
+arch/x86/idt.h       Gate layout, stub count, the struct regs frame — x86-private
+arch/x86/isr.s       The 48 stubs and the common entry/exit path they share
+arch/x86/idt_test.c  Self tests that read the IDTR back and fire a real int3
+arch/x86/pic.c       8259A pair: remapped off the exception vectors, masks, EOI
+arch/x86/pic.h       Vector base, line count, the spurious rule — x86-private
+arch/x86/pic_test.c  Self tests for the masks and the acknowledge path
+arch/x86/pit.c       8254 timer: 100 Hz on IRQ 0, 64-bit tick counter
+arch/x86/pit.h       Divisor arithmetic and the frequency limits — x86-private
+arch/x86/pit_test.c  Self tests for the divisor and the unmasked line
 arch/x86/arch.c      Implements arch_init(): what this machine sets up at boot
 arch/x86/io.h        Port I/O (inb/outb) — x86-private; generic code never includes it
 arch/x86/linker.ld   Memory layout: the kernel is loaded at 1 MiB
 kernel/kernel.c      kernel_main: first C code that runs
 kernel/kprintf.c     Formatted output, log levels, output channels
 kernel/string.c      Freestanding string/memory helpers
+kernel/panic.c       kpanic: the last words of a kernel that cannot go on
 kernel/ktest.c       Boot-time self-test suite
 include/             Generic public headers (arch.h, kprintf.h, string.h, vga.h, ...)
 grub.cfg             GRUB menu entry to boot the kernel
@@ -182,14 +197,18 @@ aggiungere in futuro x86-64, ARM o RISC-V non significhi riscrivere tutto.
 ### Stato
 
 Il kernel si avvia, scrive sullo schermo tramite il VGA text buffer e registra
-i log sulla porta seriale.
+i log sulla porta seriale. Installa la propria GDT e la propria IDT, trasforma
+un'eccezione non gestita in un dump dei registri e un arresto invece di un
+reset silenzioso, e tiene il tempo sull'8254 a 100 Hz. A ogni avvio gira una
+suite di self test che chiede all'hardware cosa ha caricato davvero.
 
 - [x] **Fase 0** — ambiente di sviluppo (toolchain cross-compilata)
 - [x] **Fase 1** — boot via GRUB/Multiboot, output VGA e seriale
 - [x] **Fase 2** — GDT e TSS (segmentazione)
-- [ ] **Fase 3** — IDT, eccezioni e interrupt hardware (timer, tastiera)
+- [ ] **Fase 3** — IDT, eccezioni e interrupt hardware (timer fatto, poi la tastiera)
 - [ ] **Fase 4** — gestione della memoria (PMM, paging, heap)
 - [ ] **Fase 5** — multitasking
+- [ ] **Fase 6** — driver e filesystem
 
 ### Requisiti
 
@@ -269,12 +288,23 @@ arch/x86/gdt.c       GDT e TSS: i descrittori di segmento passati alla CPU
 arch/x86/gdt_flush.s lgdt, il far jump che ricarica cs, e ltr
 arch/x86/gdt_test.c  Self test che rileggono cs, ds, tr e il GDTR dalla CPU
 arch/x86/gdt.h       Layout dei descrittori e selettori — privato x86
+arch/x86/idt.c       IDT, dispatcher, e la metà arch dell'API degli interrupt
+arch/x86/idt.h       Layout dei gate, numero di stub, il frame struct regs — privato x86
+arch/x86/isr.s       I 48 stub e il percorso comune di ingresso e uscita
+arch/x86/idt_test.c  Self test che rileggono l'IDTR e lanciano un int3 vero
+arch/x86/pic.c       Coppia 8259A: rimappata fuori dai vettori delle eccezioni, maschere, EOI
+arch/x86/pic.h       Vettore base, numero di linee, regola delle spurie — privato x86
+arch/x86/pic_test.c  Self test sulle maschere e sul percorso di acknowledge
+arch/x86/pit.c       Timer 8254: 100 Hz su IRQ 0, contatore di tick a 64 bit
+arch/x86/pit.h       Aritmetica del divisore e limiti di frequenza — privato x86
+arch/x86/pit_test.c  Self test sul divisore e sulla linea smascherata
 arch/x86/arch.c      Implementa arch_init(): cosa prepara al boot questa macchina
 arch/x86/io.h        Port I/O (inb/outb) — privato x86; il codice generico non lo include mai
 arch/x86/linker.ld   Layout di memoria: il kernel viene caricato a 1 MiB
 kernel/kernel.c      kernel_main: primo codice C eseguito
 kernel/kprintf.c     Output formattato, livelli di log, canali di output
 kernel/string.c      Helper freestanding per stringhe/memoria
+kernel/panic.c       kpanic: le ultime parole di un kernel che non può continuare
 kernel/ktest.c       Suite di self test al boot
 include/             Header pubblici generici (arch.h, kprintf.h, string.h, vga.h, ...)
 grub.cfg             Voce di menu di GRUB per avviare il kernel
